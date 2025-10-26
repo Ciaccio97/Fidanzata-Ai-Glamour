@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Fidanzata AI — Avatar Builder</title>
+  <meta name="description" content="Costruisci l'avatar AI della tua fidanzata virtuale: occhi, capelli, fisico, stile.">
+  <link rel="icon" href="/assets/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg:#0b0a0c;
+      --fg:#fce7f3;
+      --accent:#ec4899;
+      --card:rgba(20,20,23,.55);
+      --stroke:rgba(255,255,255,.08);
+    }
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 700px at 80% -10%, rgba(236,72,153,.25), transparent),
+                       radial-gradient(900px 600px at -10% 90%, rgba(147,197,253,.18), transparent),
+                       var(--bg);
+         color:var(--fg); font-family: Inter, ui-sans-serif, system-ui, -apple-system;
+         -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;}
+    .glass{background:var(--card); border:1px solid var(--stroke); backdrop-filter: blur(10px); border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,.35)}
+    .btn{background:var(--accent); color:white; border-radius:999px; padding:.65rem 1rem; font-weight:600; box-shadow:0 6px 20px rgba(236,72,153,.35); transition:transform .15s ease, opacity .2s ease}
+    .btn:hover{transform:translateY(-1px); opacity:.96}
+    .seg{display:flex; gap:6px; padding:6px; background:rgba(255,255,255,.04); border:1px solid var(--stroke); border-radius:999px}
+    .seg button{flex:1; padding:.5rem .9rem; border-radius:999px; border:1px solid transparent; background:transparent; color:var(--fg); opacity:.8}
+    .seg button.active{background:rgba(236,72,153,.18); border-color:rgba(236,72,153,.55); opacity:1}
+    .pill{display:inline-flex; align-items:center; gap:6px; padding:.35rem .6rem; border-radius:999px; border:1px solid var(--stroke); background:rgba(255,255,255,.04); font-size:.8rem; opacity:.9}
+    .field{display:flex; flex-direction:column; gap:.35rem}
+    select{appearance:none; background:rgba(255,255,255,.04); border:1px solid var(--stroke); color:var(--fg); padding:.65rem .8rem; border-radius:12px}
+    .skeleton{position:relative; overflow:hidden}
+    .skeleton::after{content:""; position:absolute; inset:0; transform:translateX(-100%);
+                     background:linear-gradient(120deg, transparent, rgba(255,255,255,.06), transparent);
+                     animation:shimmer 1.4s infinite;}
+    @keyframes shimmer {100%{ transform:translateX(100%)}}
+    .tag{border:1px solid var(--stroke); border-radius:999px; padding:.2rem .55rem; font-size:.75rem; opacity:.85}
+    .tiny{opacity:.7; font-size:.78rem}
+    .headline{letter-spacing:.4px}
+  </style>
+</head>
+<body>
+  <div class="max-w-7xl mx-auto p-5 md:p-7">
+    <!-- Topbar -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-pink-500/30 grid place-items-center border border-white/10">💞</div>
+        <div class="font-semibold tracking-wide">Fidanzata AI — Builder</div>
+      </div>
+      <div class="hidden md:flex items-center gap-2">
+        <span class="tag">Privata</span>
+        <span class="tag">18+</span>
+        <a href="#" class="tiny underline">Privacy</a>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="glass p-6 md:p-8 mb-6">
+      <div class="flex flex-col md:flex-row md:items-end gap-4 md:gap-8 justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-semibold headline">Crea il tuo avatar</h1>
+          <p class="tiny mt-2">Scegli occhi, capelli, fisico e stile. L'anteprima è generata da AI (solo adulti, no somiglianze reali).</p>
+        </div>
+        <div class="seg">
+          <button class="active" id="mode-portrait">Ritratto</button>
+          <button id="mode-half">Mezzo busto</button>
+          <button id="mode-full">Figura intera</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: Controls -->
+      <div class="glass p-5 md:p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="field">Tonalità pelle
+            <select id="skin">
+              <option value="light">chiara</option>
+              <option value="olive" selected>olivacea</option>
+              <option value="tan">abbronzata</option>
+              <option value="brown">marrone</option>
+              <option value="dark">scura</option>
+            </select>
+          </label>
+          <label class="field">Occhi
+            <select id="eyes">
+              <option value="marroni" selected>marroni</option>
+              <option value="nocciola">nocciola</option>
+              <option value="verdi">verdi</option>
+              <option value="azzurri">azzurri</option>
+              <option value="grigi">grigi</option>
+            </select>
+          </label>
+
+          <label class="field">Capelli — stile
+            <select id="hair_style">
+              <option value="lunghi ondulati" selected>lunghi ondulati</option>
+              <option value="lunghi lisci">lunghi lisci</option>
+              <option value="medio caschetto">medio caschetto</option>
+              <option value="ricci voluminosi">ricci voluminosi</option>
+              <option value="coda alta">coda alta</option>
+            </select>
+          </label>
+          <label class="field">Capelli — colore
+            <select id="hair_color">
+              <option value="castani" selected>castani</option>
+              <option value="neri">neri</option>
+              <option value="biondi">biondi</option>
+              <option value="ramati">ramati</option>
+              <option value="mogano">mogano</option>
+            </select>
+          </label>
+
+          <label class="field">Fisico
+            <select id="body">
+              <option value="snella" selected>snella</option>
+              <option value="armoniosa">armoniosa</option>
+              <option value="atletica">atletica</option>
+              <option value="curvy elegante">curvy elegante</option>
+            </select>
+          </label>
+          <label class="field">Vibe / stile
+            <select id="style">
+              <option value="romantica e femminile" selected>romantica</option>
+              <option value="sensuale dark">sensuale dark</option>
+              <option value="elegante minimal">elegante minimal</option>
+              <option value="dolce ragazza della porta accanto">dolce</option>
+              <option value="glamour cinematografico">glamour</option>
+            </select>
+          </label>
+
+          <label class="field">Abbigliamento
+            <select id="outfit">
+              <option value="vestito seta nero" selected>vestito seta nero</option>
+              <option value="top in pizzo rosso">top in pizzo rosso</option>
+              <option value="camicia bianca sbottonata">camicia bianca</option>
+              <option value="abito elegante color champagne">abito elegante</option>
+              <option value="maglioncino soft e jeans">maglioncino + jeans</option>
+            </select>
+          </label>
+          <label class="field">Sfondo
+            <select id="bg">
+              <option value="sfondo scuro sfocato" selected>scuro sfocato</option>
+              <option value="notte con luci bokeh">notte bokeh</option>
+              <option value="camera elegante in penombra">camera elegante</option>
+              <option value="studio fotografico soft light">studio soft</option>
+            </select>
+          </label>
+
+          <label class="field">Espressione
+            <select id="expr">
+              <option value="sorriso dolce">sorriso dolce</option>
+              <option value="sguardo magnetico" selected>sguardo magnetico</option>
+              <option value="ammiccante leggero">ammiccante</option>
+              <option value="timida e curiosa">timida</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-3 mt-5">
+          <button id="btnGen" class="btn">Genera anteprima</button>
+          <button id="btnRnd" class="px-3 py-2 border border-white/10 rounded-lg">🎲 Casual</button>
+          <span id="status" class="tiny"></span>
+        </div>
+
+        <details class="mt-4">
+          <summary class="cursor-pointer opacity-90">Vedi prompt generato</summary>
+          <pre id="prompt" class="mt-2 p-3 bg-white/5 border border-white/10 rounded text-xs whitespace-pre-wrap"></pre>
+        </details>
+      </div>
+
+      <!-- Right: Preview -->
+      <div class="glass p-4 md:p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="tiny">Anteprima avatar</div>
+          <div class="flex gap-2">
+            <span class="pill">AI preview</span>
+            <span class="pill">1024×1024</span>
+          </div>
+        </div>
+        <div id="preview" class="rounded-xl border border-white/10 overflow-hidden skeleton" style="aspect-ratio:1/1; background:rgba(0,0,0,.25)">
+          <div class="w-full h-full grid place-items-center opacity-80">
+            <div class="text-center">
+              <div class="text-5xl mb-2">✨</div>
+              <div class="">Pronta per la generazione</div>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button id="btnDownload" class="px-3 py-2 border border-white/10 rounded-lg" disabled>Scarica</button>
+          <button id="btnUse" class="btn" disabled>Usa come avatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 tiny opacity-70 text-center">
+      © Fidanzata AI — solo intrattenimento. Personaggi fittizi, maggiorenni.
+    </div>
+  </div>
+
+  <script>
+    // Simple segmented state
+    const portrait = document.getElementById('mode-portrait');
+    const half = document.getElementById('mode-half');
+    const full = document.getElementById('mode-full');
+    let framing = "ritratto 4:5";
+    function setActive(btn){
+      [portrait,half,full].forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    portrait.onclick = ()=>{ setActive(portrait); framing="ritratto 4:5"; };
+    half.onclick = ()=>{ setActive(half); framing="mezzo busto"; };
+    full.onclick = ()=>{ setActive(full); framing="figura intera"; };
+
+    const API = "/api/generate-avatar";
+
+    function buildPrompt(){
+      const skin = document.getElementById('skin').value;
+      const eyes = document.getElementById('eyes').value;
+      const hair_style = document.getElementById('hair_style').value;
+      const hair_color = document.getElementById('hair_color').value;
+      const body = document.getElementById('body').value;
+      const style = document.getElementById('style').value;
+      const outfit = document.getElementById('outfit').value;
+      const bg = document.getElementById('bg').value;
+      const expr = document.getElementById('expr').value;
+      return `Aesthetic ${framing} portrait of an **adult** Italian woman, ${hair_style} ${hair_color}, eyes ${eyes}, skin ${skin}, body ${body}, expression ${expr}; style ${style}; outfit ${outfit}; background ${bg}; cinematic soft light, high detail, tasteful, no minors, no resemblance to real persons.`;
+    }
+
+    function randomize(){
+      for(const sel of document.querySelectorAll('select')){
+        const opts = sel.options; sel.selectedIndex = Math.floor(Math.random()*opts.length);
+      }
+      document.getElementById('prompt').textContent = buildPrompt();
+    }
+
+    async function generate(){
+      const btn = document.getElementById('btnGen');
+      const status = document.getElementById('status');
+      const preview = document.getElementById('preview');
+      const prompt = buildPrompt();
+      document.getElementById('prompt').textContent = prompt;
+
+      btn.disabled = true; status.textContent = "Creo l'anteprima…";
+      preview.classList.add('skeleton');
+
+      try{
+        const r = await fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({prompt})});
+        const data = await r.json();
+        if(!r.ok || !data.image_url) throw new Error(data.error || 'Errore generazione');
+        const img = new Image();
+        img.src = data.image_url; img.alt = "Avatar AI";
+        img.style.width="100%"; img.style.height="100%"; img.style.objectFit="cover";
+        preview.innerHTML = ""; preview.appendChild(img);
+        document.getElementById('btnDownload').disabled = false;
+        document.getElementById('btnUse').disabled = false;
+        status.textContent = "Pronta 💞";
+      }catch(e){
+        status.textContent = "Ops, riprova.";
+        console.error(e);
+      }finally{
+        btn.disabled = false;
+        preview.classList.remove('skeleton');
+      }
+    }
+
+    document.getElementById('btnGen').onclick = generate;
+    document.getElementById('btnRnd').onclick = randomize;
+    document.getElementById('btnDownload').onclick = ()=>{ const img = document.querySelector('#preview img'); if(img) window.open(img.src,'_blank'); }
+    document.getElementById('btnUse').onclick = ()=>{ alert('Avatar impostato! (hook qui)'); };
+
+    // init
+    document.getElementById('prompt').textContent = buildPrompt();
+  </script>
+</body>
+</html>

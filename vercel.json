@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/generate-avatar",
+      "destination": "https://YOUR-BACKEND-URL/generate-avatar"
+    }
+  ]
+}

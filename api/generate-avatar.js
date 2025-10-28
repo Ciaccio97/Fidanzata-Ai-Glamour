@@ -1,12 +1,24 @@
 // api/generate-avatar.js
 import { InferenceClient } from "@huggingface/inference";
 
-const client = new InferenceClient(process.env.HF_TOKEN);
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-const image = await client.textToImage({
-    provider: "nebius",
-    model: "black-forest-labs/FLUX.1-schnell",
-	inputs: "Astronaut riding a horse",
-	parameters: { num_inference_steps: 5 },
-});
-/// Use the generated image (it's a Blob)
+  const { prompt } = req.body;
+
+  const client = new InferenceClient(process.env.HF_TOKEN);
+
+  try {
+    const image = await client.textToImage({
+      model: "black-forest-labs/FLUX.1-schnell",
+      inputs: prompt,
+    });
+
+    res.status(200).json({ image });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Errore nella generazione immagine" });
+  }
+}
